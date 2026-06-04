@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Recruiting Survey">
+<title>Soccer Recruiting — Discovery Survey</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --purple: #534AB7;
+  --purple-dark: #3C3489;
+  --purple-light: #EEEDFE;
+  --text: #1a1a1a;
+  --text-sec: #666;
+  --border: #d8d8d8;
+  --border-light: #efefef;
+  --bg: #ffffff;
+  --bg-sec: #f6f6f9;
+  --radius: 10px;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+body { font-family: var(--font); background: var(--bg-sec); color: var(--text); min-height: 100vh; padding: 20px 16px 80px; -webkit-text-size-adjust: 100%; }
+.shell { max-width: 720px; margin: 0 auto; }
+
+/* Header */
+.hdr { background: var(--bg); border-radius: var(--radius); padding: 24px; margin-bottom: 14px; border: 1px solid var(--border-light); }
+.hdr h1 { font-size: 21px; font-weight: 600; margin-bottom: 6px; }
+.hdr p { font-size: 15px; color: var(--text-sec); line-height: 1.6; }
+.badge { display: inline-block; margin-top: 10px; font-size: 12px; padding: 4px 12px; background: var(--purple-light); color: var(--purple-dark); border-radius: 12px; font-weight: 500; }
+
+/* Progress */
+.prog-wrap { margin-bottom: 14px; }
+.prog-bar { height: 5px; background: var(--border); border-radius: 3px; }
+.prog-fill { height: 5px; background: var(--purple); border-radius: 3px; transition: width 0.3s ease; }
+.prog-label { font-size: 13px; color: var(--text-sec); margin-top: 6px; }
+
+/* Cards */
+.card { background: var(--bg); border-radius: var(--radius); border: 1px solid var(--border-light); padding: 24px; margin-bottom: 12px; display: none; }
+.card.active { display: block; }
+.card-title { font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--purple); margin-bottom: 22px; }
+
+/* Q blocks */
+.qblock { margin-bottom: 28px; }
+.qblock:last-of-type { margin-bottom: 4px; }
+.qlabel { font-size: 17px; font-weight: 500; margin-bottom: 8px; line-height: 1.5; }
+.qhint { font-size: 14px; color: var(--text-sec); margin-bottom: 12px; display: block; }
+
+/* ── CHIP BUTTONS (native <button>) ── */
+.chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip-btn {
+  padding: 11px 18px;
+  border: 1.5px solid var(--border);
+  border-radius: 24px;
+  font-size: 15px;
+  font-family: var(--font);
+  font-weight: 400;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 46px;
+  line-height: 1.2;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+}
+.chip-btn.on {
+  background: var(--purple-light);
+  border-color: var(--purple);
+  color: var(--purple-dark);
+  font-weight: 600;
+}
+
+/* ── RADIO BUTTONS (native <button>) ── */
+.radios { display: flex; flex-direction: column; gap: 10px; }
+.radio-btn {
+  padding: 15px 18px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 16px;
+  font-family: var(--font);
+  font-weight: 400;
+  background: var(--bg);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 54px;
+  line-height: 1.4;
+  width: 100%;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+}
+.radio-btn.on {
+  background: var(--purple-light);
+  border-color: var(--purple);
+  color: var(--purple-dark);
+  font-weight: 600;
+}
+
+/* Select */
+select {
+  width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 14px 40px 14px 16px; font-size: 16px; font-family: var(--font);
+  color: var(--text); background: var(--bg); outline: none;
+  -webkit-appearance: none; appearance: none; min-height: 52px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+}
+select:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-light); outline: none; }
+
+/* Textarea */
+textarea {
+  width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px; font-size: 16px; font-family: var(--font);
+  color: var(--text); background: var(--bg); resize: vertical; min-height: 100px; outline: none;
+}
+textarea:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-light); }
+
+/* ── PRICE CARDS (native <button>) ── */
+.price-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.price-btn {
+  padding: 18px 8px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font);
+  background: var(--bg);
+  cursor: pointer;
+  text-align: center;
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 74px;
+  width: 100%;
+  transition: background 0.1s, border-color 0.1s;
+}
+.price-btn.on { border: 2.5px solid var(--purple); background: var(--purple-light); }
+.price-btn .amt { font-size: 20px; font-weight: 600; color: var(--text); display: block; }
+.price-btn .per { font-size: 12px; color: var(--text-sec); margin-top: 3px; display: block; }
+
+/* Rank table */
+.rank-table { width: 100%; border-collapse: collapse; }
+.rank-table thead th { font-size: 12px; font-weight: 600; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: center; }
+.rank-table thead th:first-child { text-align: left; }
+.rank-table tbody tr { border-bottom: 1px solid var(--border-light); }
+.rank-table tbody tr:last-child { border-bottom: none; }
+.rank-table tbody td { padding: 14px 10px; font-size: 15px; vertical-align: middle; }
+.rank-table tbody td:first-child { padding-left: 0; line-height: 1.5; }
+.rank-table .sub { font-size: 13px; color: var(--text-sec); margin-top: 3px; }
+.rank-input {
+  width: 58px; height: 52px; border: 1.5px solid var(--border); border-radius: 8px;
+  text-align: center; font-size: 22px; font-weight: 600; font-family: var(--font);
+  color: var(--purple-dark); background: var(--bg); outline: none; display: block; margin: 0 auto;
+}
+.rank-input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-light); }
+.rank-input.valid { background: var(--purple-light); border-color: var(--purple); }
+.rank-input.error { border-color: #d00; background: #fff0f3; }
+.rank-hint { font-size: 13px; color: var(--text-sec); margin-top: 10px; padding: 10px 14px; background: var(--bg-sec); border-radius: 6px; border-left: 3px solid var(--purple); line-height: 1.5; }
+.rank-error { font-size: 13px; color: #cc0033; margin-top: 8px; display: none; }
+
+/* Sliders */
+.slider-block { margin-bottom: 24px; }
+.slider-top { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 15px; color: var(--text-sec); }
+.slider-val { font-size: 16px; font-weight: 500; color: var(--text-sec); min-width: 24px; text-align: right; }
+.slider-val.live { color: var(--purple); }
+input[type=range] { width: 100%; accent-color: var(--purple); height: 32px; cursor: pointer; }
+.slider-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-sec); margin-top: 2px; }
+
+/* Nav */
+.nav { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--border-light); }
+.step-label { font-size: 14px; color: var(--text-sec); }
+.nav-btn {
+  padding: 14px 28px;
+  border-radius: var(--radius);
+  font-size: 16px;
+  font-family: var(--font);
+  font-weight: 400;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 52px;
+  min-width: 90px;
+  transition: background 0.1s;
+}
+.nav-btn:active { background: var(--bg-sec); }
+.nav-btn.primary {
+  background: var(--purple);
+  border-color: var(--purple);
+  color: white;
+  font-weight: 600;
+}
+.nav-btn.primary:active { background: var(--purple-dark); }
+
+/* Done */
+.done { text-align: center; padding: 40px 0; }
+.done-icon { font-size: 60px; margin-bottom: 20px; }
+.done h2 { font-size: 22px; font-weight: 600; margin-bottom: 10px; }
+.done p { font-size: 16px; color: var(--text-sec); line-height: 1.6; margin-bottom: 24px; }
+.dl-btn {
+  padding: 16px 36px;
+  background: var(--purple);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 17px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 56px;
+}
+.dl-btn:active { background: var(--purple-dark); }
+.dl-note { font-size: 13px; color: var(--text-sec); margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<div class="hdr">
+  <h1>Soccer Recruiting — Customer Discovery</h1>
+  <p>6–8 minutes · Your answers directly shape what we build. All responses are confidential.</p>
+  <span class="badge">Early Access Discovery · Soccer</span>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-bar"><div class="prog-fill" id="prog" style="width:12%"></div></div>
+  <div class="prog-label" id="prog-label">Step 1 of 6</div>
+</div>
+
+<!-- ── S1: About you ── -->
+<div class="card active" id="s1">
+  <div class="card-title">About you</div>
+
+  <div class="qblock">
+    <div class="qlabel">I am a...</div>
+    <div class="chips" id="role">
+      <button type="button" class="chip-btn" data-v="Parent of an athlete">Parent of an athlete</button>
+      <button type="button" class="chip-btn" data-v="Athlete (self-managing)">Athlete (self-managing)</button>
+      <button type="button" class="chip-btn" data-v="Both — athlete + parent">Both — athlete + parent</button>
+      <button type="button" class="chip-btn" data-v="Club / HS coach">Club / HS coach</button>
+    </div>
+  </div>
+
+  <div class="qblock">
+    <div class="qlabel">Athlete graduation year</div>
+    <select id="gradyear">
+      <option value="">Select year...</option>
+      <option>2025</option><option>2026</option><option>2027</option>
+      <option>2028</option><option>2029</option><option>2030+</option>
+    </select>
+  </div>
+
+  <div class="qblock">
+    <div class="qlabel">Division levels you're targeting</div>
+    <span class="qhint">Select all that apply.</span>
+    <div class="chips" id="division">
+      <button type="button" class="chip-btn" data-v="NCAA D1">NCAA D1</button>
+      <button type="button" class="chip-btn" data-v="NCAA D2">NCAA D2</button>
+      <button type="button" class="chip-btn" data-v="NCAA D3">NCAA D3</button>
+      <button type="button" class="chip-btn" data-v="NAIA">NAIA</button>
+      <button type="button" class="chip-btn" data-v="JUCO">JUCO</button>
+      <button type="button" class="chip-btn" data-v="Not sure yet">Not sure yet</button>
+    </div>
+  </div>
+
+  <div class="nav">
+    <span class="step-label">Step 1 of 6</span>
+    <button type="button" class="nav-btn primary" data-goto="2">Next →</button>
+  </div>
+</div>
+
+<!-- ── S2: Pain points ── -->
+<div class="card" id="s2">
+  <div class="card-title">Current recruiting experience</div>
+
+  <div class="qblock">
+    <div class="qlabel">What's the hardest part of recruiting right now?</div>
+    <span class="qhint">Select all that apply.</span>
+    <div class="chips" id="pain">
+      <button type="button" class="chip-btn" data-v="Finding the right schools to target">Finding the right schools to target</button>
+      <button type="button" class="chip-btn" data-v="Getting verified coach contacts">Getting verified coach contacts</button>
+      <button type="button" class="chip-btn" data-v="Writing outreach emails">Writing outreach emails</button>
+      <button type="button" class="chip-btn" data-v="Reaching out to enough programs">Reaching out to enough programs</button>
+      <button type="button" class="chip-btn" data-v="Following up consistently">Following up consistently</button>
+      <button type="button" class="chip-btn" data-v="Knowing if a school is a good fit">Knowing if a school is a good fit</button>
+      <button type="button" class="chip-btn" data-v="Getting responses from coaches">Getting responses from coaches</button>
+      <button type="button" class="chip-btn" data-v="Staying organized over months">Staying organized over months</button>
+      <button type="button" class="chip-btn" data-v="Knowing what to do next">Knowing what to do next</button>
+      <button type="button" class="chip-btn" data-v="Keeping track of long conversations">Keeping track of long conversations</button>
+      <button type="button" class="chip-btn" data-v="Preparing for coach interactions">Preparing for coach interactions</button>
+      <button type="button" class="chip-btn" data-v="Creating highlight film">Creating highlight film</button>
+    </div>
+  </div>
+
+  <div class="qblock">
+    <div class="qlabel">How are you currently managing outreach?</div>
+    <div class="radios" id="current-tool">
+      <button type="button" class="radio-btn" data-v="Haven't started yet">Haven't started yet</button>
+      <button type="button" class="radio-btn" data-v="Manually — spreadsheets or notes">Manually — spreadsheets or notes</button>
+      <button type="button" class="radio-btn" data-v="Paid recruiting service (NCSA, BeRecruited, etc.)">Paid recruiting service (NCSA, BeRecruited, etc.)</button>
+      <button type="button" class="radio-btn" data-v="My club / HS coach handles it">My club / HS coach handles it</button>
+      <button type="button" class="radio-btn" data-v="Other">Other</button>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button type="button" class="nav-btn" data-goto="1">← Back</button>
+    <span class="step-label">Step 2 of 6</span>
+    <button type="button" class="nav-btn primary" data-goto="3">Next →</button>
+  </div>
+</div>
+
+<!-- ── S3: Platform ranking ── -->
+<div class="card" id="s3">
+  <div class="card-title">Platform tools — value ranking</div>
+
+  <div class="qblock">
+    <div class="qlabel">Rank the platform tools by value to you.</div>
+    <span class="qhint">Enter 1 (most valuable) through 6 (least valuable). Each number used once.</span>
+    <div class="rank-hint">💡 Think about what would make you sign up — rank that #1.</div>
+    <br>
+    <table class="rank-table">
+      <thead><tr><th>Tool</th><th>Rank (1–6)</th></tr></thead>
+      <tbody>
+        <tr><td>Athlete ↔ school matching engine<div class="sub">Find colleges & programs that fit your profile preferences</div></td><td><input class="rank-input" type="number" inputmode="numeric" min="1" max="6" placeholder="–" data-feature="Matching engine" data-group="platform" oninput="validateRank(this,'platform')"></td></tr>
+        <tr><td>Full college program database<div class="sub">Division, coaching staff, verified contacts</div></td><td><input class="rank-input" type="number" inputmode="numeric" min="1" max="6" placeholder="–" data-feature="College program database" data-group="platform" oninput="validateRank(this,'platform')"></td></tr>
+        <tr><td>Personalized email templates<div class="sub">Dynamic variables, save and reuse</div></td><td><input class="rank-input" type="number" inputmode="numeric" min="1" max="6" placeholder="–" data-feature="Email templates" data-group="platform" oninput="validateRank(this,'platform')"></td></tr>
+        <tr><td>Send via your own Gmail account<div class="sub">Emails come from the athlete, not a platform</div></td><td><input class="rank-input" type="number" inputmode="numeric" min="1" max="6" placeholder="–" data-feature="Gmail integration" data-group="platform" oninput="validateRank(this,'platform')"></td></tr>
+        <tr><td>Mass personalized outreach<div class="sub">Send to many coaches at once, each feels personal</div></td><td><input class="rank-input" type="number" inputmode="numeric" min="1" max="6" placeholder="–" data-feature="Mass personalized outreach" data-group="platform" oninput="validateRank(this,'platform')"></td></tr>
+        <tr><td>Coach engagement score<div class="sub">Opened email, clicked highlight link, responded, etc.</div></td><td><input class="rank-input" type="number" inputmode="numeric" min="1" max="6" placeholder="–" data-feature="Coach engagement score" data-group="platform" oninput="validateRank(this,'platform')"></td></tr>
+      </tbody>
+    </table>
+    <div class="rank-error" id="platform-rank-error">⚠ Each rank (1–6) must be used exactly once.</div>
+  </div>
+
+  <div class="qblock">
+    <div class="qlabel">How important are each of these platform tools?</div>
+    <span class="qhint">Drag slider from left (not important) to right (critical).</span>
+    <div class="slider-block"><div class="slider-top"><span>School matching accuracy</span><span class="slider-val" id="pv1l">–</span></div><input type="range" min="1" max="10" value="1" id="pv1" oninput="sl('pv1l',this.value)"><div class="slider-labels"><span>Not important</span><span>Critical</span></div></div>
+    <div class="slider-block"><div class="slider-top"><span>Complete, verified coach contacts</span><span class="slider-val" id="pv2l">–</span></div><input type="range" min="1" max="10" value="1" id="pv2" oninput="sl('pv2l',this.value)"><div class="slider-labels"><span>Not important</span><span>Critical</span></div></div>
+    <div class="slider-block"><div class="slider-top"><span>High-volume outreach capability</span><span class="slider-val" id="pv3l">–</span></div><input type="range" min="1" max="10" value="1" id="pv3" oninput="sl('pv3l',this.value)"><div class="slider-labels"><span>Not important</span><span>Critical</span></div></div>
+    <div class="slider-block"><div class="slider-top"><span>Emails sent from my own Gmail</span><span class="slider-val" id="pv4l">–</span></div><input type="range" min="1" max="10" value="1" id="pv4" oninput="sl('pv4l',this.value)"><div class="slider-labels"><span>Not important</span><span>Critical</span></div></div>
+    <div class="slider-block"><div class="slider-top"><span>Coach engagement scoring</span><span class="slider-val" id="pv5l">–</span></div><input type="range" min="1" max="10" value="1" id="pv5" oninput="sl('pv5l',this.value)"><div class="slider-labels"><span>Not important</span><span>Critical</span></div></div>
+  </div>
+
+  <div class="nav">
+    <button type="button" class="nav-btn" data-goto="2">← Back</button>
+    <span class="step-label">Step 3 of 6</span>
+    <button type="button" class="nav-btn primary" data-goto="4">Next →</button>
+  </div>
+</div>
+
+<!-- ── S4: AI Coach ── -->
+<div class="card" id="s4">
+  <div class="card-title">AI recruiting coach — value ranking</div>
+
+  <div class="qblock">
+    <div class="qlabel">Rank the AI coach capabilities by value to you.</div>
+    <span class="qhint">Enter 1 (most valuable) through 6 (least valuable). Each number used once.</span>
+    <div class="rank-hint">💡 The AI coach guides you through the full recruiting journey — rank what you'd use most.</div>
+    <br>
+    <table class="rank-table">
+      <thead><tr><th>Capability</th><th>Rank (1–6)</th></tr></thead>
+      <tbody>
+        <tr><td>School &amp; program intelligence<div class="sub">Playing style, roster needs, coach tendencies, culture</div></td><td><input class="rank-input" type="number" inputmode="numeric" min="1" max="6" placeholder="–" data-feature="School & program intelligence" data-group="coach" oninput="validateRank(this,'coach')"></td></tr>
+        <tr><td>Task management &amp; to-do lists<div class="sub">Organize, track, and suggest actions across all schools</div></td><td><input class="rank-input" type="number" inputmode="numeric" min="1" max="6" placeholder="–" data-feature="Task management & to-dos" data-group="coach" oninput="validateRank(this,'coach')"></td></tr>
+        <tr><td>Athlete-Coach interactions memory &amp; summaries<div class="sub">"Here's where things stand with Coach Smith after 6 months"</div></td><td><input class="rank-input" type="number" inputmode="numeric" min="1" max="6" placeholder="–" data-feature="Athlete-Coach interactions memory & summaries" data-group="coach" oninput="validateRank(this,'coach')"></td></tr>
+        <tr><td>Timely nudges &amp; reminders<div class="sub">Stage-aware — "It's September, time to follow up with D2 targets"</div></td><td><input class="rank-input" type="number" inputmode="numeric" min="1" max="6" placeholder="–" data-feature="Timely nudges & reminders" data-group="coach" oninput="validateRank(this,'coach')"></td></tr>
+        <tr><td>AI-assisted email replies<div class="sub">Draft personalized responses to coach messages</div></td><td><input class="rank-input" type="number" inputmode="numeric" min="1" max="6" placeholder="–" data-feature="AI-assisted email replies" data-group="coach" oninput="validateRank(this,'coach')"></td></tr>
+        <tr><td>Interaction coaching &amp; prep<div class="sub">Prepare for calls, campus visits, and official offers</div></td><td><input class="rank-input" type="number" inputmode="numeric" min="1" max="6" placeholder="–" data-feature="Interaction coaching & prep" data-group="coach" oninput="validateRank(this,'coach')"></td></tr>
+      </tbody>
+    </table>
+    <div class="rank-error" id="coach-rank-error">⚠ Each rank (1–6) must be used exactly once.</div>
+  </div>
+
+  <div class="qblock">
+    <div class="qlabel">How important are each of these AI coach capabilities?</div>
+    <span class="qhint">Drag slider from left (not important) to right (critical).</span>
+    <div class="slider-block"><div class="slider-top"><span>School &amp; program intelligence</span><span class="slider-val" id="cv1l">–</span></div><input type="range" min="1" max="10" value="1" id="cv1" oninput="sl('cv1l',this.value)"><div class="slider-labels"><span>Not important</span><span>Critical</span></div></div>
+    <div class="slider-block"><div class="slider-top"><span>Task management &amp; to-dos</span><span class="slider-val" id="cv2l">–</span></div><input type="range" min="1" max="10" value="1" id="cv2" oninput="sl('cv2l',this.value)"><div class="slider-labels"><span>Not important</span><span>Critical</span></div></div>
+    <div class="slider-block"><div class="slider-top"><span>Conversation summaries over time</span><span class="slider-val" id="cv3l">–</span></div><input type="range" min="1" max="10" value="1" id="cv3" oninput="sl('cv3l',this.value)"><div class="slider-labels"><span>Not important</span><span>Critical</span></div></div>
+    <div class="slider-block"><div class="slider-top"><span>Timely nudges &amp; stage-aware reminders</span><span class="slider-val" id="cv4l">–</span></div><input type="range" min="1" max="10" value="1" id="cv4" oninput="sl('cv4l',this.value)"><div class="slider-labels"><span>Not important</span><span>Critical</span></div></div>
+    <div class="slider-block"><div class="slider-top"><span>AI-drafted email replies</span><span class="slider-val" id="cv5l">–</span></div><input type="range" min="1" max="10" value="1" id="cv5" oninput="sl('cv5l',this.value)"><div class="slider-labels"><span>Not important</span><span>Critical</span></div></div>
+    <div class="slider-block"><div class="slider-top"><span>Prep coaching for calls &amp; visits</span><span class="slider-val" id="cv6l">–</span></div><input type="range" min="1" max="10" value="1" id="cv6" oninput="sl('cv6l',this.value)"><div class="slider-labels"><span>Not important</span><span>Critical</span></div></div>
+  </div>
+
+  <div class="qblock">
+    <div class="qlabel">Overall, how would you use the AI coach?</div>
+    <div class="radios" id="coach-usage">
+      <button type="button" class="radio-btn" data-v="Daily — I'd check it like a recruiting dashboard">Daily — I'd check it like a recruiting dashboard</button>
+      <button type="button" class="radio-btn" data-v="Weekly — for planning and staying on track">Weekly — for planning and staying on track</button>
+      <button type="button" class="radio-btn" data-v="Reactively — when something comes up">Reactively — when something comes up (a coach reply, an event)</button>
+      <button type="button" class="radio-btn" data-v="Not sure, depends on the experience">Not sure, depends on the experience</button>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button type="button" class="nav-btn" data-goto="3">← Back</button>
+    <span class="step-label">Step 4 of 6</span>
+    <button type="button" class="nav-btn primary" data-goto="5">Next →</button>
+  </div>
+</div>
+
+<!-- ── S5: Pricing ── -->
+<div class="card" id="s5">
+  <div class="card-title">Pricing &amp; willingness to pay</div>
+
+  <div class="qblock">
+    <div class="qlabel">What would you expect to pay per month for the full platform — matching, coach database, mass email outreach, <em>and</em> AI recruiting coach?</div>
+    <span class="qhint">Enter the monthly subscription price you'd consider fair for this product. This is a recurring monthly charge, not a one-time fee.</span>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;max-width:220px">
+      <span style="font-size:24px;font-weight:700;color:var(--purple)">$</span>
+      <input type="number" inputmode="decimal" min="0" max="9999" step="1" id="price-open" placeholder="0" style="font-size:24px;font-weight:600;color:var(--text);border:1.5px solid var(--border);border-radius:var(--radius);padding:12px 16px;width:120px;text-align:center;font-family:var(--font);outline:none;" onfocus="this.style.borderColor='var(--purple)'" onblur="this.style.borderColor='var(--border)'">
+      <span style="font-size:16px;color:var(--text-sec);white-space:nowrap">/ month</span>
+    </div>
+  </div>
+
+  <div class="qblock">
+    <div class="qlabel">Would you pay more for the AI coach as an add-on if the base platform was cheaper?</div>
+    <div class="radios" id="addon-pref">
+      <button type="button" class="radio-btn" data-v="No — bundle everything at one price">No — I want everything bundled at one price</button>
+      <button type="button" class="radio-btn" data-v="Yes — lower base + AI coach add-on">Yes — lower base price + optional AI coach add-on</button>
+      <button type="button" class="radio-btn" data-v="Mainly care about AI coach">I mainly care about the AI coach; tools are secondary</button>
+      <button type="button" class="radio-btn" data-v="Mainly care about platform tools">I mainly care about the platform tools; not the AI coach</button>
+    </div>
+  </div>
+
+  <div class="qblock">
+    <div class="qlabel">At what monthly price does it start to feel too expensive?</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:10px">
+      <span style="font-size:20px;font-weight:700;color:var(--purple)">$</span>
+      <input type="range" min="10" max="200" value="10" step="5" id="ceiling-slider" oninput="sl('ceiling-out',this.value,true)" style="flex:1">
+      <span style="font-size:18px;font-weight:600;color:var(--text-sec);min-width:48px" id="ceiling-out">–</span>
+      <span style="font-size:14px;color:var(--text-sec)">/mo</span>
+    </div>
+    <div class="slider-labels" style="margin-top:4px"><span>$10</span><span>$200</span></div>
+  </div>
+
+  <div class="qblock">
+    <div class="qlabel">Preferred billing structure</div>
+    <div class="radios" id="billing-pref">
+      <button type="button" class="radio-btn" data-v="Monthly">Monthly — flexibility to cancel</button>
+      <button type="button" class="radio-btn" data-v="Seasonal (3–6 months)">Seasonal (3–6 months) — aligns with recruiting cycles</button>
+      <button type="button" class="radio-btn" data-v="Annual">Annual — best value</button>
+      <button type="button" class="radio-btn" data-v="One-time fee">One-time fee for full recruiting cycle</button>
+    </div>
+  </div>
+
+  <div class="qblock">
+    <div class="qlabel">Are you currently paying for recruiting services?</div>
+    <div class="radios" id="current-spend">
+      <button type="button" class="radio-btn" data-v="No">No</button>
+      <button type="button" class="radio-btn" data-v="Yes — under $50/mo">Yes — under $50/mo</button>
+      <button type="button" class="radio-btn" data-v="Yes — $50–$150/mo">Yes — $50–$150/mo</button>
+      <button type="button" class="radio-btn" data-v="Yes — over $150/mo">Yes — over $150/mo</button>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button type="button" class="nav-btn" data-goto="4">← Back</button>
+    <span class="step-label">Step 5 of 6</span>
+    <button type="button" class="nav-btn primary" data-goto="6">Next →</button>
+  </div>
+</div>
+
+<!-- ── S6: Purchase intent ── -->
+<div class="card" id="s6">
+  <div class="card-title">Purchase intent</div>
+
+  <div class="qblock">
+    <div class="qlabel">If this launched today at your expected price, how likely would you be to sign up?</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:10px">
+      <input type="range" min="1" max="10" value="1" step="1" id="intent-slider" oninput="sl('intent-out',this.value)" style="flex:1">
+      <span style="font-size:22px;font-weight:700;color:var(--text-sec);min-width:28px" id="intent-out">–</span>
+    </div>
+    <div class="slider-labels"><span>1 – Definitely not</span><span>10 – Definitely yes</span></div>
+  </div>
+
+  <div class="qblock">
+    <div class="qlabel">What's more likely to drive your purchase decision?</div>
+    <div class="radios" id="purchase-driver">
+      <button type="button" class="radio-btn" data-v="Platform tools (database, matching, email)">Platform tools — the database, matching, and email features</button>
+      <button type="button" class="radio-btn" data-v="AI coach (guidance, reminders, prep)">AI coach — the guidance, reminders, and preparation support</button>
+      <button type="button" class="radio-btn" data-v="Both together — need the full package">Both together — I need the full package</button>
+      <button type="button" class="radio-btn" data-v="Neither yet — need to see it work first">Neither yet — I need to see it work first</button>
+    </div>
+  </div>
+
+  <div class="qblock">
+    <div class="qlabel">What would push you to a "10 — definitely signing up"?</div>
+    <textarea id="push-over" placeholder="e.g. If the coach database was verified and current, or if the AI coach could prep me for a campus visit..."></textarea>
+  </div>
+
+  <div class="qblock">
+    <div class="qlabel">Is there a must-have feature not listed?</div>
+    <textarea id="missing-feature" placeholder="e.g. Highlight video integration, response tracking, parent vs. athlete views..."></textarea>
+  </div>
+
+  <div class="qblock">
+    <div class="qlabel">Anything else we should know?</div>
+    <textarea id="open-end" placeholder="Concerns, questions, context about your situation..."></textarea>
+  </div>
+
+  <div class="nav">
+    <button type="button" class="nav-btn" data-goto="5">← Back</button>
+    <span class="step-label">Step 6 of 6</span>
+    <button type="button" class="nav-btn primary" id="submit-btn">Submit →</button>
+  </div>
+</div>
+
+<!-- ── Done ── -->
+<div class="card" id="s-done">
+  <div class="done">
+    <div class="done-icon">✅</div>
+    <h2>Thank you — this is incredibly helpful.</h2>
+    <p>Your response has been saved. We'll be in touch as we build.</p>
+  </div>
+</div>
+
+<!-- Error screen -->
+<div class="card" id="s-error">
+  <div class="done">
+    <div class="done-icon">⚠️</div>
+    <h2>Something went wrong.</h2>
+    <p>Your response couldn't be saved. Please let the survey administrator know.</p>
+  </div>
+</div>
+
+</div><!-- /shell -->
+<script>
+var stepPct = {1:12,2:28,3:46,4:62,5:80,6:95};
+
+function goTo(n) {
+  document.querySelectorAll('.card').forEach(function(c){ c.classList.remove('active'); });
+  var t = document.getElementById('s'+n);
+  if (t) {
+    t.classList.add('active');
+    document.getElementById('prog').style.width = (stepPct[n]||100)+'%';
+    document.getElementById('prog-label').textContent = 'Step '+n+' of 6';
+    window.scrollTo(0,0);
+  }
+}
+
+function sl(id, val, isDollar) {
+  var el = document.getElementById(id);
+  el.textContent = val;
+  el.classList.add('live');
+}
+
+// ── Chip groups (multi or single) ──
+function initChips(id, multi) {
+  var wrap = document.getElementById(id);
+  if (!wrap) return;
+  wrap.querySelectorAll('.chip-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (!multi) wrap.querySelectorAll('.chip-btn').forEach(function(b){ b.classList.remove('on'); });
+      btn.classList.toggle('on');
+    });
+  });
+}
+
+// ── Radio groups ──
+function initRadio(id) {
+  var wrap = document.getElementById(id);
+  if (!wrap) return;
+  wrap.querySelectorAll('.radio-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      wrap.querySelectorAll('.radio-btn').forEach(function(b){ b.classList.remove('on'); });
+      btn.classList.add('on');
+    });
+  });
+}
+
+// ── Price cards ──
+function initPrice(id) {
+  var wrap = document.getElementById(id);
+  if (!wrap) return;
+  wrap.querySelectorAll('.price-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      wrap.querySelectorAll('.price-btn').forEach(function(b){ b.classList.remove('on'); });
+      btn.classList.add('on');
+    });
+  });
+}
+
+// ── Nav buttons ──
+document.querySelectorAll('[data-goto]').forEach(function(btn) {
+  btn.addEventListener('click', function() { goTo(parseInt(btn.dataset.goto)); });
+});
+
+document.getElementById('submit-btn').addEventListener('click', submitForm);
+
+// ── Rank validation ──
+function validateRank(input, group) {
+  var v = parseInt(input.value);
+  var errEl = document.getElementById(group+'-rank-error');
+  var all = document.querySelectorAll('[data-group="'+group+'"]');
+  all.forEach(function(i){ i.classList.remove('valid','error'); });
+  if (input.value !== '' && (v<1||v>6||isNaN(v))) {
+    input.classList.add('error');
+    errEl.style.display='block';
+    errEl.textContent='⚠ Please enter a number between 1 and 6.';
+    return;
+  }
+  var vals = Array.from(all).map(function(i){ return i.value; }).filter(function(x){ return x!==''; });
+  var dupes = vals.filter(function(v,i,a){ return a.indexOf(v)!==i; });
+  if (dupes.length>0) {
+    all.forEach(function(i){ if(dupes.indexOf(i.value)>-1) i.classList.add('error'); });
+    errEl.style.display='block';
+    errEl.textContent='⚠ Each rank (1–6) must be used exactly once — you have a duplicate.';
+  } else {
+    all.forEach(function(i){ if(i.value!=='') i.classList.add('valid'); });
+    errEl.style.display='none';
+  }
+}
+
+// ── Read helpers ──
+function getChips(id) {
+  var wrap = document.getElementById(id); if(!wrap) return '';
+  return Array.from(wrap.querySelectorAll('.chip-btn.on')).map(function(b){ return b.dataset.v; }).join('; ');
+}
+function getRadio(id) {
+  var el = document.querySelector('#'+id+' .radio-btn.on'); return el ? el.dataset.v : '';
+}
+function getOpenPrice() {
+  var el = document.getElementById('price-open');
+  if (!el || el.value === '') return 'not answered';
+  return '$' + el.value + '/mo';
+}
+function getPrice(id) {
+  var el = document.querySelector('#'+id+' .price-btn.on'); return el ? el.dataset.v : '';
+}
+function getSliderVal(id, labelId) {
+  var label = document.getElementById(labelId);
+  return (label && label.classList.contains('live')) ? document.getElementById(id).value : 'not answered';
+}
+function getText(id) {
+  var el = document.getElementById(id); return el ? el.value.replace(/"/g,'""') : '';
+}
+function getRanks(group) {
+  var result = {};
+  document.querySelectorAll('[data-group="'+group+'"]').forEach(function(i){ result[i.dataset.feature]=i.value||''; });
+  return result;
+}
+
+// ── Build data object ──
+function buildData() {
+  var ts = new Date().toLocaleString();
+  var p = getRanks('platform'), c = getRanks('coach');
+  var ceilEl = document.getElementById('ceiling-out');
+  var intentEl = document.getElementById('intent-out');
+  return {
+    'Timestamp': ts,
+    'Role': getChips('role'),
+    'Grad Year': document.getElementById('gradyear').value,
+    'Divisions Targeted': getChips('division'),
+    'Hardest Parts of Recruiting': getChips('pain'),
+    'Current Outreach Method': getRadio('current-tool'),
+    'RANK: Matching Engine (Platform)': p['Matching engine']||'',
+    'RANK: College Program Database (Platform)': p['College program database']||'',
+    'RANK: Email Templates (Platform)': p['Email templates']||'',
+    'RANK: Gmail Integration (Platform)': p['Gmail integration']||'',
+    'RANK: Mass Personalized Outreach (Platform)': p['Mass personalized outreach']||'',
+    'RANK: Coach Engagement Score (Platform)': p['Coach engagement score']||'',
+    'IMP: School Matching Accuracy': getSliderVal('pv1','pv1l'),
+    'IMP: Verified Coach Contacts': getSliderVal('pv2','pv2l'),
+    'IMP: High-Volume Outreach': getSliderVal('pv3','pv3l'),
+    'IMP: Gmail Send': getSliderVal('pv4','pv4l'),
+    'IMP: Coach Engagement Scoring': getSliderVal('pv5','pv5l'),
+    'RANK: School & Program Intelligence (AI Coach)': c['School & program intelligence']||'',
+    'RANK: Task Management (AI Coach)': c['Task management & to-dos']||'',
+    'RANK: Athlete-Coach Interactions Memory & Summaries (AI Coach)': c['Athlete-Coach interactions memory & summaries']||'',
+    'RANK: Timely Nudges (AI Coach)': c['Timely nudges & reminders']||'',
+    'RANK: AI Email Replies (AI Coach)': c['AI-assisted email replies']||'',
+    'RANK: Interaction Prep (AI Coach)': c['Interaction coaching & prep']||'',
+    'IMP: School Intelligence': getSliderVal('cv1','cv1l'),
+    'IMP: Task Management': getSliderVal('cv2','cv2l'),
+    'IMP: Athlete-Coach Interactions Memory & Summaries': getSliderVal('cv3','cv3l'),
+    'IMP: Nudges & Reminders': getSliderVal('cv4','cv4l'),
+    'IMP: AI Email Replies': getSliderVal('cv5','cv5l'),
+    'IMP: Interaction Prep Coaching': getSliderVal('cv6','cv6l'),
+    'AI Coach Usage Frequency': getRadio('coach-usage'),
+    'Expected Monthly Price': getOpenPrice(),
+    'Bundle vs Add-On Preference': getRadio('addon-pref'),
+    'Price Ceiling (Too Expensive)': (ceilEl.classList.contains('live') ? '$'+ceilEl.textContent : 'not answered'),
+    'Billing Structure Preference': getRadio('billing-pref'),
+    'Currently Paying for Recruiting': getRadio('current-spend'),
+    'Purchase Likelihood (1-10)': (intentEl.classList.contains('live') ? intentEl.textContent : 'not answered'),
+    'Primary Purchase Driver': getRadio('purchase-driver'),
+    'What Would Push to a 10': getText('push-over'),
+    'Must-Have Features Not Listed': getText('missing-feature'),
+    'Other Comments': getText('open-end')
+  };
+}
+
+// ── Submit to Airtable via Netlify function ──
+function submitForm() {
+  var btn = document.getElementById('submit-btn');
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+
+  var data = buildData();
+
+  fetch('/.netlify/functions/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(json) {
+    document.querySelectorAll('.card').forEach(function(c){ c.classList.remove('active'); });
+    if (json.success) {
+      document.getElementById('s-done').classList.add('active');
+    } else {
+      document.getElementById('s-error').classList.add('active');
+    }
+    document.getElementById('prog').style.width='100%';
+    document.getElementById('prog-label').textContent='Complete';
+    window.scrollTo(0,0);
+  })
+  .catch(function(err) {
+    document.querySelectorAll('.card').forEach(function(c){ c.classList.remove('active'); });
+    document.getElementById('s-error').classList.add('active');
+    window.scrollTo(0,0);
+  });
+}
+
+// ── Init ──
+initChips('role',false);
+initChips('division',true);
+initChips('pain',true);
+initRadio('current-tool');
+initRadio('coach-usage');
+initRadio('addon-pref');
+initRadio('billing-pref');
+initRadio('current-spend');
+initRadio('purchase-driver');
+</script>
+</body>
+</html>
