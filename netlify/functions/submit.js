@@ -5,7 +5,7 @@ exports.handler = async function(event, context) {
 
   const AIRTABLE_TOKEN = process.env.AIRTABLE_TOKEN;
   const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
-  const TABLE_NAME = 'Recruiting Discovery';
+  const TABLE_NAME = 'Responses';
 const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(TABLE_NAME)}`;
 console.log('Calling URL:', url);
 console.log('Token first 10 chars:', AIRTABLE_TOKEN ? AIRTABLE_TOKEN.substring(0,10) : 'MISSING');
